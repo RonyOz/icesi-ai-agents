@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "deploy": "npm run build && gh-pages -d dist -t true -m \"chore: deploy [skip ci]\"",
+    "deploy": "npm run build && gh-pages -d dist --nojekyll --dotfiles -m \"chore: deploy [skip ci]\"",
     "astro": "astro"
   },
   "dependencies": {
