@@ -15,6 +15,7 @@ pnpm-debug.log*
 # agents
 .agents/
 .claude/
+skills-lock.json
 
 # environment variables
 .env

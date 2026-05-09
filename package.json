@@ -14,23 +14,14 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.4",
-    "@astrojs/react": "^5.0.4",
     "@astrojs/sitemap": "^3.7.2",
     "@tailwindcss/typography": "~0.5.16",
     "@tailwindcss/vite": "~4.1.13",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
     "astro": "^6.3.1",
-    "fuse.js": "^7.3.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
     "tailwindcss": "~4.1.13"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "typescript": "^6.0.3"
-  },
-  "overrides": {
-    "@vitejs/plugin-react": "^4.7.0"
   }
 }
