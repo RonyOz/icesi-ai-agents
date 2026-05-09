@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import VideoFrame from "../../components/VideoFrame.astro";
 import Cenefa from "../../components/Cenefa.astro";
+import { withBase } from "../../lib/url";
 
 export async function getStaticPaths() {
   const agents = await getCollection("agents");
@@ -27,7 +28,7 @@ const { name, summary, description, team, videoUrl, videoLocal, cover } =
       <ol class="flex flex-wrap items-center gap-2 text-muted">
         <li>
           <a
-            href="/"
+            href={withBase("/")}
             class="font-medium hover:text-icesi-blue-deep transition-colors"
           >
             Showcase

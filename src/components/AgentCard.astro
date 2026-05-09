@@ -1,5 +1,6 @@
 ---
 import Cenefa from './Cenefa.astro';
+import { withBase } from '../lib/url';
 
 type Props = {
   slug: string;
@@ -15,14 +16,14 @@ const hasMedia = Boolean(videoUrl || videoLocal || cover);
 ---
 
 <a
-  href={`/agents/${slug}/`}
+  href={withBase(`/agents/${slug}/`)}
   data-name={name}
   class="group flex h-full flex-col border border-border bg-(--color-surface) transition-colors hover:border-icesi-blue"
 >
   <div class="relative w-full overflow-hidden">
     {cover ? (
       <img
-        src={cover}
+        src={withBase(cover)}
         alt=""
         loading="lazy"
         class="block h-full w-full object-cover aspect-video"

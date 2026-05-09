@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/url';
 const year = new Date().getFullYear();
 ---
 
@@ -6,7 +7,7 @@ const year = new Date().getFullYear();
   <div class="container-page py-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex items-center gap-4">
       <img
-        src="/brand/icesi-positivo.svg"
+        src={withBase('/brand/icesi-positivo.svg')}
         alt="Universidad Icesi"
         width="120"
         height="34"

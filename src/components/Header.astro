@@ -1,12 +1,13 @@
 ---
+import { withBase } from '../lib/url';
 const { count } = Astro.props as { count?: number };
 ---
 
 <header class="border-b border-border bg-white sticky top-0 z-30">
   <div class="container-page flex items-center justify-between py-3">
-    <a href="/" class="flex items-center gap-4">
+    <a href={withBase('/')} class="flex items-center gap-4">
       <img
-        src="/brand/icesi-positivo.svg"
+        src={withBase('/brand/icesi-positivo.svg')}
         alt="Universidad Icesi"
         width="116"
         height="32"

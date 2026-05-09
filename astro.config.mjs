@@ -7,7 +7,9 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://ai-agents.icesi.edu.co',
+  site: 'https://ronyoz.github.io',
+  base: '/icesi-ai-agents/',
+  trailingSlash: 'always',
   vite: {
     plugins: [tailwindcss()],
   },

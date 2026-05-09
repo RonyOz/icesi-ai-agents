@@ -203,19 +203,56 @@ Ambos provienen del paquete oficial del manual de marca, formato Pantone, sin de
 
 El sitio es 100% estático. La salida del `npm run build` queda en `./dist/`.
 
-Opciones recomendadas:
+### GitHub Pages (configurado, *deploy from a branch*)
 
-- **Vercel** — `vercel deploy`. Detección automática del framework Astro.
-- **Cloudflare Pages** — conecta el repo, comando build `npm run build`, output `dist`.
-- **GitHub Pages** — sube `dist/` a la rama `gh-pages`.
-- **Hosting institucional** — copia el contenido de `dist/` al servidor.
+URL final: `https://ronyoz.github.io/icesi-ai-agents/`
 
-Antes de cada release:
+`astro.config.mjs` ya tiene:
+
+```js
+site: 'https://ronyoz.github.io',
+base: '/icesi-ai-agents/',
+trailingSlash: 'always',
+```
+
+Y `public/.nojekyll` evita que GitHub procese el sitio con Jekyll.
+
+#### Configuración inicial del repo (una sola vez)
+
+1. Crea el repo en GitHub: `ronyoz/icesi-ai-agents`.
+2. `git init && git add . && git commit -m "init"`.
+3. `git remote add origin git@github.com:ronyoz/icesi-ai-agents.git`.
+4. `git branch -M main && git push -u origin main`.
+5. En GitHub → **Settings** → **Pages**:
+   - **Source**: *Deploy from a branch*
+   - **Branch**: `gh-pages` · **Folder**: `/ (root)`
+   - Guarda. La primera vez aparecerá como *not configured*; aparecerá tras el primer `npm run deploy`.
+
+#### Cada vez que quieras publicar cambios
+
+```sh
+npm run deploy
+```
+
+El script:
+1. Ejecuta `npm run build` → genera `dist/`.
+2. Empuja `dist/` a la rama `gh-pages` mediante el paquete `gh-pages` (incluye `.nojekyll`).
+3. GitHub Pages sirve la rama automáticamente en 30–60 segundos.
+
+> **Importante**: `gh-pages` push requiere acceso `git@github.com` configurado (SSH key o HTTPS con token). Verifica con `git push origin main` antes del primer `npm run deploy`.
+
+### Otras plataformas (alternativas)
+
+- **Vercel** — `vercel deploy`. Detección automática. Requiere quitar `base` del `astro.config.mjs` (servirá en raíz).
+- **Cloudflare Pages** — conecta el repo, build `npm run build`, output `dist`. Mismo ajuste de `base`.
+- **Hosting institucional** — copia `dist/` al servidor. Ajusta `site` y `base` al dominio final.
+
+### Antes de cada release
 
 ```sh
 npm run check    # tipos + colección de contenido
 npm run build    # genera dist/
-npm run preview  # verifica localmente
+npm run preview  # verifica localmente (servirá en /icesi-ai-agents/)
 ```
 
 ---

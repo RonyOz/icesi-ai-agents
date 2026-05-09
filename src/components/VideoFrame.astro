@@ -1,5 +1,6 @@
 ---
 import Cenefa from './Cenefa.astro';
+import { withBase } from '../lib/url';
 
 type Props = {
   videoUrl?: string;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 const { videoUrl, videoLocal, cover, title } = Astro.props;
+const localSrc = videoLocal ? withBase(videoLocal) : undefined;
+const posterSrc = cover ? withBase(cover) : undefined;
 
 function youtubeId(url: string): string | null {
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
@@ -43,11 +46,11 @@ const shareLink = videoUrl ? isSharePointShareLink(videoUrl) : false;
   <video
     controls
     preload="metadata"
-    poster={cover}
+    poster={posterSrc}
     class="block w-full aspect-video bg-black"
     aria-label={`Video del agente ${title}`}
   >
-    <source src={videoLocal} type="video/mp4" />
+    <source src={localSrc} type="video/mp4" />
   </video>
 ) : yt ? (
   <iframe
