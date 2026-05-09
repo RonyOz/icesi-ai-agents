@@ -1,5 +1,7 @@
 # Showcase de Agentes de IA · Universidad Icesi
 
+![banner](public/banner.png)
+
 Galería estática que documenta los agentes de inteligencia artificial en desarrollo en la Universidad Icesi. Pensada para presentación presencial (pantalla grande) y exploración individual.
 
 Coordinación de Proyectos · IA.
