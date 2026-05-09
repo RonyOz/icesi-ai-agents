@@ -1,0 +1,41 @@
+---
+const { count } = Astro.props as { count?: number };
+---
+
+<header class="border-b border-[var(--color-border)] bg-[var(--color-bg)]/85 backdrop-blur-sm sticky top-0 z-30">
+  <div class="container-page flex items-center justify-between py-5">
+    <a href="/" class="flex items-center gap-4">
+      <img
+        src="/brand/icesi-positivo.svg"
+        alt="Universidad Icesi"
+        width="116"
+        height="32"
+        class="h-7 w-auto"
+      />
+      <span class="hidden sm:inline-block h-6 w-px bg-[var(--color-border)]"></span>
+      <span class="hidden sm:flex flex-col leading-tight">
+        <span class="font-display text-[15px] font-semibold tracking-tight text-[var(--color-text)]">
+          Showcase de Agentes de IA
+        </span>
+        <span class="text-[11px] text-[var(--color-subtle)] tracking-wide uppercase">
+          Coordinación de Proyectos · IA
+        </span>
+      </span>
+    </a>
+
+    <nav class="flex items-center gap-3 text-sm">
+      {count !== undefined && (
+        <span class="chip" aria-label={`${count} agentes`}>
+          {count} agentes
+        </span>
+      )}
+      <a
+        href="https://www.icesi.edu.co"
+        rel="noopener"
+        class="hidden sm:inline-flex chip hover:border-[var(--color-brand)] hover:text-[var(--color-brand-ink)] transition-colors"
+      >
+        icesi.edu.co ↗
+      </a>
+    </nav>
+  </div>
+</header>

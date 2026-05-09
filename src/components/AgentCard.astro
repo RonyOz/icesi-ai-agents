@@ -1,0 +1,63 @@
+---
+import { accentVar, statusLabel, type Accent } from '../lib/accent';
+
+type Props = {
+  slug: string;
+  name: string;
+  summary: string;
+  category: string;
+  status: string;
+  accent: Accent;
+  tags?: string[];
+};
+
+const { slug, name, summary, category, status, accent, tags = [] } = Astro.props;
+const accentColor = accentVar[accent];
+const statusInfo = statusLabel[status] ?? statusLabel.Idea;
+---
+
+<a
+  href={`/agents/${slug}/`}
+  class="group relative flex h-full flex-col gap-5 border border-[var(--color-border)] bg-[var(--color-surface)] p-6 transition-colors hover:border-[var(--color-brand)] hover:bg-[var(--color-surface-2)]"
+  data-category={category}
+  data-status={status}
+  data-name={name}
+  data-tags={tags.join(',')}
+  style={`--card-accent: ${accentColor}`}
+>
+  <span
+    aria-hidden="true"
+    class="absolute left-0 top-0 h-full w-[3px] bg-[var(--card-accent)] opacity-0 transition-opacity group-hover:opacity-100"
+  ></span>
+
+  <div class="flex items-start justify-between gap-3">
+    <span
+      class="text-[11px] font-semibold uppercase tracking-[0.16em]"
+      style={`color: ${accentColor};`}
+    >
+      {category}
+    </span>
+    <span class="chip" style={`color: ${statusInfo.tone};`}>
+      <span class="chip-dot"></span>
+      {statusInfo.label}
+    </span>
+  </div>
+
+  <div class="flex flex-col gap-2.5">
+    <h3 class="font-display text-[1.35rem] font-semibold leading-snug tracking-tight text-[var(--color-text)]">
+      {name}
+    </h3>
+    <p class="text-sm leading-relaxed text-[var(--color-muted)] line-clamp-3">{summary}</p>
+  </div>
+
+  <div class="mt-auto flex items-center justify-between border-t border-[var(--color-border)] pt-4">
+    {tags.length > 0 ? (
+      <span class="text-xs text-[var(--color-subtle)] truncate">
+        {tags.slice(0, 2).join(' · ')}
+      </span>
+    ) : <span></span>}
+    <span class="text-xs font-medium text-[var(--color-brand-ink)] group-hover:underline">
+      Ver detalle →
+    </span>
+  </div>
+</a>

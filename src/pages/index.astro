@@ -1,0 +1,91 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AgentCard from '../components/AgentCard.astro';
+import Stat from '../components/Stat.astro';
+import FilterBar from '../components/FilterBar.tsx';
+
+const allAgents = await getCollection('agents');
+
+const agents = allAgents
+  .map((entry) => ({
+    slug: entry.id.replace(/\.(md|mdx)$/, ''),
+    ...entry.data,
+  }))
+  .sort((a, b) => {
+    if (a.featured !== b.featured) return a.featured ? -1 : 1;
+    return a.name.localeCompare(b.name, 'es');
+  });
+
+const categories = Array.from(new Set(agents.map((a) => a.category))).sort();
+const statuses = ['Idea', 'Prototipo', 'Beta', 'Producción'];
+
+const counts = {
+  total: agents.length,
+  prototipo: agents.filter((a) => a.status === 'Prototipo').length,
+  idea: agents.filter((a) => a.status === 'Idea').length,
+};
+---
+
+<BaseLayout
+  title="Showcase de Agentes de IA · Universidad Icesi"
+  description="Galería curada de agentes de inteligencia artificial desarrollados por equipos de la Universidad Icesi."
+  count={agents.length}
+>
+  <section class="mb-14 sm:mb-20 grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-end">
+    <div>
+      <p class="eyebrow mb-4">Coordinación de Proyectos · IA</p>
+      <h1 class="font-display text-[2.5rem] sm:text-[3.5rem] font-semibold leading-[1.05] tracking-tight text-[var(--color-text)]">
+        Agentes de Inteligencia artificial en desarrollo en Icesi
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg text-muted leading-relaxed">
+        Agentes que se encuentran actualmente en desarrollo en la universidad
+        Icesi que aplican IA a desafíos reales de cumplimiento, estrategia,
+        datos, procesos y gestión de proyectos.
+      </p>
+    </div>
+
+    <dl class="grid grid-cols-3 gap-px bg-border border border-border">
+      <Stat label="Agentes en cartera" value={counts.total} />
+      <Stat label="Prototipos activos" value={counts.prototipo} />
+      <Stat label="En exploración" value={counts.idea} />
+    </dl>
+  </section>
+
+  <hr class="rule mb-10" />
+
+  <FilterBar
+    client:load
+    categories={categories}
+    statuses={statuses}
+  />
+
+  <ul
+    id="agents-grid"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border"
+    role="list"
+    aria-label="Agentes disponibles"
+  >
+    {agents.map((agent) => (
+      <li class="bg-(--color-surface)">
+        <AgentCard
+          slug={agent.slug}
+          name={agent.name}
+          summary={agent.summary}
+          category={agent.category}
+          status={agent.status}
+          accent={agent.accent}
+          tags={agent.tags}
+        />
+      </li>
+    ))}
+  </ul>
+
+  <p
+    id="empty-state"
+    class="hidden mt-12 text-center text-sm text-muted"
+    role="status"
+  >
+    No hay agentes que coincidan con tu búsqueda.
+  </p>
+</BaseLayout>

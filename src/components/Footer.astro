@@ -1,0 +1,26 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-24 border-t border-[var(--color-border)] bg-[var(--color-bg-soft)]">
+  <div class="container-page py-12 grid gap-8 sm:grid-cols-2">
+    <div class="flex flex-col gap-3">
+      <img
+        src="/brand/icesi-positivo.svg"
+        alt="Universidad Icesi"
+        width="140"
+        height="40"
+        class="h-9 w-auto"
+      />
+      <p class="text-sm text-[var(--color-muted)] max-w-md leading-relaxed">
+        Showcase coordinado por el equipo de Proyectos de IA de la Universidad
+        Icesi. Documenta el avance de iniciativas estudiantiles aplicadas a
+        retos reales de organizaciones.
+      </p>
+    </div>
+    <div class="flex flex-col sm:items-end justify-between gap-3 text-xs text-[var(--color-subtle)]">
+      <p>© {year} Universidad Icesi. Todos los derechos reservados.</p>
+      <p>Contenido curado · construido con Astro.</p>
+    </div>
+  </div>
+</footer>
