@@ -366,9 +366,7 @@ const areas = Array.from(
       }
 
       showToast(isEdit ? 'Agente actualizado' : 'Agente creado', 'success');
-      resetSaveButton();
-      closePanel();
-      void refreshAgents();
+      window.setTimeout(() => window.location.reload(), 400);
     } catch {
       showToast('Error de conexión', 'error');
     } finally {
@@ -543,7 +541,7 @@ const areas = Array.from(
         return;
       }
       showToast('Agente eliminado', 'success');
-      await refreshAgents();
+      window.setTimeout(() => window.location.reload(), 400);
     } catch {
       showToast('Error de conexión', 'error');
     }
