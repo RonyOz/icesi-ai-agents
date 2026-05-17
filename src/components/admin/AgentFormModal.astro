@@ -59,53 +59,52 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="agent-video-url">Video URL</label>
+            <label for="agent-area">Área</label>
             <input
-              type="url"
-              id="agent-video-url"
-              name="video_url"
-              placeholder="https://youtube.com/…"
+              type="text"
+              id="agent-area"
+              name="area"
+              placeholder="Consultoría - Organizaciones"
               autocomplete="off"
             />
           </div>
           <div class="form-group">
-            <label for="agent-video-local">Video Local</label>
+            <label for="agent-encargado">Encargado</label>
             <input
               type="text"
-              id="agent-video-local"
-              name="video_local"
-              placeholder="/videos/nombre.mp4"
+              id="agent-encargado"
+              name="encargado"
+              placeholder="Nombre del encargado"
               autocomplete="off"
             />
           </div>
         </div>
         <div class="form-group">
-          <label for="agent-cover">Cover (ruta imagen)</label>
+          <label for="agent-video-url">Video URL</label>
           <input
-            type="text"
+            type="url"
+            id="agent-video-url"
+            name="video_url"
+            placeholder="https://youtube.com/…"
+            autocomplete="off"
+          />
+        </div>
+        <div class="form-group">
+          <label for="agent-cover">Cover (URL de imagen)</label>
+          <input
+            type="url"
             id="agent-cover"
             name="cover"
-            placeholder="/images/cover.jpg"
+            placeholder="https://…/imagen.jpg"
             autocomplete="off"
           />
         </div>
         <div class="form-group">
-          <label for="agent-team">Equipo</label>
-          <input
-            type="text"
-            id="agent-team"
-            name="team"
-            placeholder="Juan Pérez, María García"
-            autocomplete="off"
-          />
-          <p class="form-hint">Separar nombres con comas.</p>
-        </div>
-        <div class="form-group">
-          <label for="agent-description">Descripción</label>
+          <label for="agent-description">Descripción del impacto</label>
           <textarea
             id="agent-description"
             name="description"
-            placeholder="Descripción detallada del agente…"
+            placeholder="Descripción del impacto del agente…"
             rows="4"
           ></textarea>
         </div>

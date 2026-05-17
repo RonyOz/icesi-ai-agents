@@ -50,9 +50,9 @@ agents ??= [];
     name: string;
     summary: string;
     description: string;
-    team: string[];
+    area: string | null;
+    encargado: string | null;
     video_url: string | null;
-    video_local: string | null;
     cover: string | null;
   };
 
@@ -107,10 +107,10 @@ agents ??= [];
     slugInput.setAttribute('readonly', 'true');
     ($('agent-name') as HTMLInputElement).value = a.name;
     ($('agent-summary') as HTMLInputElement).value = a.summary;
+    ($('agent-area') as HTMLInputElement).value = a.area ?? '';
+    ($('agent-encargado') as HTMLInputElement).value = a.encargado ?? '';
     ($('agent-video-url') as HTMLInputElement).value = a.video_url ?? '';
-    ($('agent-video-local') as HTMLInputElement).value = a.video_local ?? '';
     ($('agent-cover') as HTMLInputElement).value = a.cover ?? '';
-    ($('agent-team') as HTMLInputElement).value = (a.team ?? []).join(', ');
     ($('agent-description') as HTMLTextAreaElement).value = a.description ?? '';
     $('modal-delete-btn').hidden = false;
     clearErrors();
@@ -131,17 +131,15 @@ agents ??= [];
     spinner.style.display = 'inline-block';
 
     const slug = ($('agent-slug') as HTMLInputElement).value.trim();
-    const teamStr = ($('agent-team') as HTMLInputElement).value.trim();
-    const team = teamStr ? teamStr.split(',').map((s) => s.trim()).filter(Boolean) : [];
 
     const body = {
       slug,
       name: ($('agent-name') as HTMLInputElement).value.trim(),
       summary: ($('agent-summary') as HTMLInputElement).value.trim(),
       description: ($('agent-description') as HTMLTextAreaElement).value.trim(),
-      team,
+      area: ($('agent-area') as HTMLInputElement).value.trim() || null,
+      encargado: ($('agent-encargado') as HTMLInputElement).value.trim() || null,
       video_url: ($('agent-video-url') as HTMLInputElement).value.trim() || null,
-      video_local: ($('agent-video-local') as HTMLInputElement).value.trim() || null,
       cover: ($('agent-cover') as HTMLInputElement).value.trim() || null,
     };
 

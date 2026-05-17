@@ -13,10 +13,7 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
   if (!isAdmin(cookies)) return jsonError('Unauthorized', 401);
   try {
     const body = await request.json();
-    await updateAgent(params.slug!, {
-      ...body,
-      team: Array.isArray(body.team) ? body.team : undefined,
-    });
+    await updateAgent(params.slug!, body);
     return jsonOk({ ok: true });
   } catch (e) {
     console.error('[api/agents PUT]', e);

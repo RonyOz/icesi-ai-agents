@@ -1,17 +1,13 @@
 ---
 import Cenefa from './Cenefa.astro';
-import { withBase } from '../lib/url';
 
 type Props = {
   videoUrl?: string;
-  videoLocal?: string;
   cover?: string;
   title: string;
 };
 
-const { videoUrl, videoLocal, cover, title } = Astro.props;
-const localSrc = videoLocal ? withBase(videoLocal) : undefined;
-const posterSrc = cover ? withBase(cover) : undefined;
+const { videoUrl, title } = Astro.props;
 
 function youtubeId(url: string): string | null {
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
@@ -42,17 +38,7 @@ const direct = videoUrl && !yt && !vm ? isDirectIframe(videoUrl) : false;
 const shareLink = videoUrl ? isSharePointShareLink(videoUrl) : false;
 ---
 
-{videoLocal ? (
-  <video
-    controls
-    preload="metadata"
-    poster={posterSrc}
-    class="block w-full aspect-video bg-black"
-    aria-label={`Video del agente ${title}`}
-  >
-    <source src={localSrc} type="video/mp4" />
-  </video>
-) : yt ? (
+{yt ? (
   <iframe
     src={`https://www.youtube-nocookie.com/embed/${yt}`}
     title={`Video del agente ${title}`}

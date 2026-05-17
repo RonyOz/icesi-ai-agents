@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   if (!isAdmin(cookies)) return jsonError('Unauthorized', 401);
   try {
     const body = await request.json();
-    const { slug, name, summary, description, team, video_url, video_local, cover } = body;
+    const { slug, name, summary, description, area, encargado, video_url, cover } = body;
     if (!slug || !name || !summary) {
       return jsonError('slug, name y summary son obligatorios', 400);
     }
@@ -26,9 +26,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       name,
       summary,
       description,
-      team: Array.isArray(team) ? team : [],
+      area,
+      encargado,
       video_url,
-      video_local,
       cover,
     });
     return jsonOk({ ok: true }, 201);

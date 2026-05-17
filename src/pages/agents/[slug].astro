@@ -11,8 +11,6 @@ const agent = await getAgentBySlug(slug!);
 if (!agent) {
   return Astro.redirect('/');
 }
-
-const team = agent.team;
 ---
 
 <BaseLayout
@@ -40,7 +38,6 @@ const team = agent.team;
     <div class="mb-8 border border-border overflow-hidden">
       <VideoFrame
         videoUrl={agent.video_url ?? undefined}
-        videoLocal={agent.video_local ?? undefined}
         cover={agent.cover ?? undefined}
         title={agent.name}
       />
@@ -60,17 +57,28 @@ const team = agent.team;
       <Cenefa />
     </div>
 
-    {agent.description && (
-      <p class="mt-6 text-[15px] leading-relaxed text-muted">
-        {agent.description}
-      </p>
+    {(agent.area || agent.encargado) && (
+      <dl class="mt-8 grid gap-4 sm:grid-cols-2 text-sm">
+        {agent.area && (
+          <div>
+            <dt class="font-semibold text-text">Área</dt>
+            <dd class="mt-1 text-muted">{agent.area}</dd>
+          </div>
+        )}
+        {agent.encargado && (
+          <div>
+            <dt class="font-semibold text-text">Encargado</dt>
+            <dd class="mt-1 text-muted">{agent.encargado}</dd>
+          </div>
+        )}
+      </dl>
     )}
 
-    {team.length > 0 && (
+    {agent.description && (
       <>
-        <h2 class="mt-10 text-xl font-bold tracking-tight">Equipo</h2>
+        <h2 class="mt-10 text-xl font-bold tracking-tight">Descripción del impacto</h2>
         <p class="mt-3 text-[15px] leading-relaxed text-muted">
-          {team.join(", ")}
+          {agent.description}
         </p>
       </>
     )}

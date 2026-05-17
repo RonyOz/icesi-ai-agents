@@ -19,9 +19,9 @@ export interface Agent {
   name: string;
   summary: string;
   description: string;
-  team: string[];
+  area: string | null;
+  encargado: string | null;
   video_url: string | null;
-  video_local: string | null;
   cover: string | null;
   updated_at: string | null;
 }
@@ -31,25 +31,14 @@ export interface AgentInput {
   name: string;
   summary: string;
   description?: string;
-  team?: string[];
+  area?: string | null;
+  encargado?: string | null;
   video_url?: string | null;
-  video_local?: string | null;
   cover?: string | null;
 }
 
 const SELECT_COLS =
-  'id, slug, name, summary, description, team, video_url, video_local, cover, updated_at';
-
-function parseTeam(raw: unknown): string[] {
-  if (Array.isArray(raw)) return raw.map(String);
-  if (typeof raw !== 'string' || raw.trim() === '') return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map(String) : [];
-  } catch {
-    return [];
-  }
-}
+  'id, slug, name, summary, description, area, encargado, video_url, cover, updated_at';
 
 function rowToAgent(row: Record<string, unknown>): Agent {
   return {
@@ -58,9 +47,9 @@ function rowToAgent(row: Record<string, unknown>): Agent {
     name: String(row.name ?? ''),
     summary: String(row.summary ?? ''),
     description: String(row.description ?? ''),
-    team: parseTeam(row.team),
+    area: (row.area as string | null) ?? null,
+    encargado: (row.encargado as string | null) ?? null,
     video_url: (row.video_url as string | null) ?? null,
-    video_local: (row.video_local as string | null) ?? null,
     cover: (row.cover as string | null) ?? null,
     updated_at: (row.updated_at as string | null) ?? null,
   };
@@ -85,7 +74,7 @@ export async function getAgentBySlug(slug: string): Promise<Agent | null> {
 export async function createAgent(input: AgentInput): Promise<void> {
   const db = getDb();
   await db.execute({
-    sql: `INSERT INTO agents (id, slug, name, summary, description, team, video_url, video_local, cover)
+    sql: `INSERT INTO agents (id, slug, name, summary, description, area, encargado, video_url, cover)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       nanoid(),
@@ -93,9 +82,9 @@ export async function createAgent(input: AgentInput): Promise<void> {
       input.name,
       input.summary,
       input.description ?? '',
-      JSON.stringify(input.team ?? []),
+      input.area ?? null,
+      input.encargado ?? null,
       input.video_url ?? null,
-      input.video_local ?? null,
       input.cover ?? null,
     ],
   });
@@ -112,9 +101,9 @@ export async function updateAgent(
   if (patch.name !== undefined) { fields.push('name = ?'); args.push(patch.name); }
   if (patch.summary !== undefined) { fields.push('summary = ?'); args.push(patch.summary); }
   if (patch.description !== undefined) { fields.push('description = ?'); args.push(patch.description); }
-  if (patch.team !== undefined) { fields.push('team = ?'); args.push(JSON.stringify(patch.team)); }
+  if (patch.area !== undefined) { fields.push('area = ?'); args.push(patch.area); }
+  if (patch.encargado !== undefined) { fields.push('encargado = ?'); args.push(patch.encargado); }
   if (patch.video_url !== undefined) { fields.push('video_url = ?'); args.push(patch.video_url); }
-  if (patch.video_local !== undefined) { fields.push('video_local = ?'); args.push(patch.video_local); }
   if (patch.cover !== undefined) { fields.push('cover = ?'); args.push(patch.cover); }
 
   if (fields.length === 0) return;
