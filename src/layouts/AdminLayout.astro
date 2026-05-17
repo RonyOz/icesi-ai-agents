@@ -1,12 +1,15 @@
 ---
 import '../styles/global.css';
 import '../styles/admin.css';
+import { withBase } from '../lib/url';
 
 type Props = {
   title: string;
+  showTopBar?: boolean;
+  withLogout?: boolean;
 };
 
-const { title } = Astro.props;
+const { title, showTopBar = true, withLogout = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -16,6 +19,7 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,7 +27,63 @@ const { title } = Astro.props;
       rel="stylesheet"
     />
   </head>
-  <body class="font-sans antialiased admin-shell">
+  <body class="font-sans antialiased bg-[var(--color-surface-2)] text-text min-h-screen">
+    {showTopBar && (
+      <header class="border-b border-border bg-white sticky top-0 z-30">
+        <div class="container-page flex items-center justify-between py-3">
+          <a href={withBase('/')} class="flex items-center gap-4">
+            <img
+              src={withBase('/brand/icesi-positivo.svg')}
+              alt="Universidad Icesi"
+              width="116"
+              height="32"
+              class="h-12 w-auto"
+            />
+            <span class="hidden sm:inline-block h-7 w-px bg-icesi-gray-2"></span>
+            <span class="hidden sm:flex flex-col leading-tight">
+              <span class="text-[15px] font-bold tracking-tight text-text">Panel Admin</span>
+              <span class="text-[11px] text-muted font-medium">Agentes de IA · Icesi</span>
+            </span>
+          </a>
+
+          <div class="flex items-center gap-2">
+            <a
+              href={withBase('/')}
+              class="hidden sm:inline-flex items-center rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-semibold text-muted hover:text-icesi-blue-deep hover:border-icesi-blue/40 transition-colors"
+            >
+              Ver sitio público
+            </a>
+            {withLogout && (
+              <button
+                type="button"
+                id="logout-btn"
+                class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-muted hover:bg-[var(--color-surface-2)] hover:text-[#dc2626] transition-colors"
+                aria-label="Cerrar sesión"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Salir
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+    )}
+
     <slot />
+
+    {withLogout && (
+      <script is:inline>
+        document.addEventListener('click', function (e) {
+          if (e.target.closest && e.target.closest('#logout-btn')) {
+            fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+              .finally(function () { window.location.href = '/admin/login'; });
+          }
+        });
+      </script>
+    )}
   </body>
 </html>

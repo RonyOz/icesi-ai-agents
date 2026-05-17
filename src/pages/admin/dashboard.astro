@@ -1,7 +1,8 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import AgentTable from '../../components/admin/AgentTable.astro';
-import AgentFormModal from '../../components/admin/AgentFormModal.astro';
+import AgentCardAdmin from '../../components/admin/AgentCardAdmin.astro';
+import AgentFormPanel from '../../components/admin/AgentFormPanel.astro';
+import Cenefa from '../../components/Cenefa.astro';
 import { getAllAgents } from '../../lib/db';
 
 let agents = await getAllAgents().catch((err) => {
@@ -11,227 +12,530 @@ let agents = await getAllAgents().catch((err) => {
 
 const loadError = agents === null;
 agents ??= [];
+
+const areas = Array.from(
+  new Set(agents.map((a) => a.area).filter((a): a is string => Boolean(a))),
+).sort((a, b) => a.localeCompare(b, 'es'));
 ---
 
 <AdminLayout title="Dashboard · Admin">
-  <a href="#main-content" class="skip-link">Saltar al contenido</a>
-
-  <div class="admin-container">
-    <div class="admin-header">
-      <h1>Agentes de IA</h1>
-      <div class="admin-header-actions">
-        <a href="/" class="btn btn-ghost">Ver sitio</a>
-        <button class="btn btn-ghost" id="logout-btn" type="button">Cerrar sesión</button>
-        <button class="btn btn-primary" id="new-agent-btn" type="button">+ Nuevo agente</button>
+  <main class="container-page py-8 sm:py-10">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+      <div>
+        <p class="eyebrow mb-2">Panel de gestión</p>
+        <h1 class="text-3xl font-extrabold tracking-tight">
+          Agentes
+          <span class="ml-2 text-base font-semibold text-muted">({agents.length})</span>
+        </h1>
       </div>
+      <button
+        type="button"
+        id="new-agent-btn"
+        class="inline-flex items-center gap-2 rounded-lg bg-icesi-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-icesi-blue-deep transition-colors shadow-sm"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Nuevo agente
+      </button>
     </div>
 
     {loadError && (
-      <div class="card" style="padding:1rem;margin-bottom:1rem;background:#fef2f2;border-color:#fecaca;color:#991b1b;">
-        Error al cargar agentes desde la base de datos. Revisá las variables de entorno
-        <code>TURSO_DATABASE_URL</code> y <code>TURSO_AUTH_TOKEN</code>.
+      <div class="mb-6 rounded-lg border border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm text-[#991b1b]">
+        Error al cargar agentes. Revisá <code>TURSO_DATABASE_URL</code> y <code>TURSO_AUTH_TOKEN</code>.
       </div>
     )}
 
-    <div class="card" id="main-content" role="region" aria-label="Lista de agentes">
-      <AgentTable agents={agents} />
+    {agents.length > 0 && (
+      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div class="relative flex-1 max-w-md">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="search"
+            id="search-input"
+            placeholder="Buscar por nombre, encargado o resumen…"
+            autocomplete="off"
+            class="w-full rounded-lg border-[1.5px] border-border bg-white pl-9 pr-3 py-2 text-sm focus:border-icesi-blue focus:outline-none focus:ring-3 focus:ring-icesi-blue/15"
+          />
+        </div>
+
+        {areas.length > 0 && (
+          <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por área">
+            <button
+              type="button"
+              class="js-area-chip rounded-full border border-icesi-blue bg-icesi-blue px-3 py-1 text-xs font-semibold text-white"
+              data-area=""
+              aria-pressed="true"
+            >
+              Todas
+            </button>
+            {areas.map((area) => (
+              <button
+                type="button"
+                class="js-area-chip rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold text-muted hover:border-icesi-blue/40 hover:text-icesi-blue-deep"
+                data-area={area}
+                aria-pressed="false"
+              >
+                {area}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    <div
+      id="agents-grid"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+    >
+      {agents.map((agent) => <AgentCardAdmin agent={agent} />)}
     </div>
-  </div>
 
-  <AgentFormModal />
+    <div id="empty-state" class={`hidden mt-10 text-center py-16 px-6 ${agents.length === 0 ? '!flex' : ''} flex-col items-center gap-4`}>
+      <div class="w-32 opacity-60">
+        <Cenefa variant="block" />
+      </div>
+      <div>
+        <p class="text-lg font-semibold text-text">
+          {agents.length === 0 ? 'No hay agentes cargados' : 'Sin resultados'}
+        </p>
+        <p class="text-sm text-muted mt-1">
+          {agents.length === 0
+            ? 'Hacé clic en "Nuevo agente" para crear el primero.'
+            : 'Probá con otros términos de búsqueda o área.'}
+        </p>
+      </div>
+    </div>
+  </main>
 
-  <div id="toast" class="toast" aria-live="polite" aria-hidden="true" role="status"></div>
+  <AgentFormPanel />
+
+  <div
+    id="toast"
+    class="admin-toast fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border px-4 py-3 text-sm font-medium shadow-lg"
+    role="status"
+    aria-live="polite"
+    data-show="false"
+  ></div>
 </AdminLayout>
 
+<script is:inline define:vars={{ areasJson: JSON.stringify(areas) }}>
+  window.__ADMIN_AREAS = JSON.parse(areasJson);
+</script>
+
 <script>
-  type AgentRow = {
-    id: string;
-    slug: string;
-    name: string;
-    summary: string;
-    description: string;
-    area: string | null;
-    encargado: string | null;
-    video_url: string | null;
-    cover: string | null;
-  };
+  import { slugify } from '../../lib/slugify';
+  import { colorForArea, relativeTime } from '../../lib/format';
+  import type { Agent } from '../../lib/db';
 
-  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  declare global { interface Window { __ADMIN_AREAS: string[] } }
 
-  function getAgentFromRow(slug: string): AgentRow | null {
-    const tr = document.querySelector<HTMLTableRowElement>(`tr[data-agent] .btn-edit[data-slug="${CSS.escape(slug)}"]`)
-      ?.closest('tr');
-    if (!tr?.dataset.agent) return null;
-    try { return JSON.parse(tr.dataset.agent) as AgentRow; } catch { return null; }
-  }
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+    document.getElementById(id) as T;
+  const $$ = <T extends HTMLElement = HTMLElement>(sel: string) =>
+    Array.from(document.querySelectorAll<T>(sel));
 
+  const grid = $('agents-grid');
+  const emptyState = $('empty-state');
+  const searchInput = $<HTMLInputElement>('search-input');
+  const panel = $('form-panel');
+  const backdrop = $('panel-backdrop');
+  const panelTitle = $('panel-title');
+  const form = $<HTMLFormElement>('agent-form');
+  const saveBtn = $<HTMLButtonElement>('panel-save');
+  const saveText = $('panel-save-text');
+  const saveSpinner = $('panel-save-spinner');
+  const toast = $('toast');
+
+  let currentFilter = { search: '', area: '' };
+  let slugManuallyEdited = false;
+
+  // ---- toast ----
   function showToast(msg: string, type: 'success' | 'error') {
-    const el = $('toast');
-    el.textContent = msg;
-    el.className = `toast toast-${type}`;
-    el.setAttribute('aria-hidden', 'false');
-    setTimeout(() => el.setAttribute('aria-hidden', 'true'), 3000);
+    toast.textContent = msg;
+    toast.className = `admin-toast fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border px-4 py-3 text-sm font-medium shadow-lg ${
+      type === 'success'
+        ? 'border-[#86efac] bg-[#f0fdf4] text-[#166534]'
+        : 'border-[#fca5a5] bg-[#fef2f2] text-[#991b1b]'
+    }`;
+    toast.dataset.show = 'true';
+    window.setTimeout(() => { toast.dataset.show = 'false'; }, 2800);
   }
 
-  function clearErrors() {
-    document.querySelectorAll('.form-error').forEach((e) => {
-      e.classList.remove('show');
-      e.textContent = '';
+  // ---- filter ----
+  function applyFilter() {
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.admin-card'));
+    const q = currentFilter.search.toLowerCase();
+    const area = currentFilter.area;
+    let visible = 0;
+
+    for (const card of cards) {
+      const matchesSearch =
+        !q ||
+        (card.dataset.nameSearch ?? '').includes(q) ||
+        (card.dataset.summarySearch ?? '').includes(q) ||
+        (card.dataset.encargadoSearch ?? '').includes(q);
+      const matchesArea = !area || card.dataset.area === area;
+      const show = matchesSearch && matchesArea;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    }
+
+    if (cards.length > 0) {
+      emptyState.classList.toggle('hidden', visible > 0);
+      emptyState.classList.toggle('!flex', visible === 0);
+    }
+  }
+
+  searchInput?.addEventListener('input', () => {
+    currentFilter.search = searchInput.value.trim();
+    applyFilter();
+  });
+
+  document.addEventListener('click', (e) => {
+    const chip = (e.target as HTMLElement).closest<HTMLElement>('.js-area-chip');
+    if (!chip) return;
+    currentFilter.area = chip.dataset.area ?? '';
+    $$('.js-area-chip').forEach((c) => {
+      const active = c === chip;
+      c.setAttribute('aria-pressed', String(active));
+      c.classList.toggle('bg-icesi-blue', active);
+      c.classList.toggle('text-white', active);
+      c.classList.toggle('border-icesi-blue', active);
+      c.classList.toggle('bg-white', !active);
+      c.classList.toggle('text-muted', !active);
+      c.classList.toggle('border-border', !active);
+    });
+    applyFilter();
+  });
+
+  // ---- panel ----
+  function openPanel(agent?: Agent) {
+    if (agent) {
+      panelTitle.textContent = 'Editar agente';
+      ($('agent-original-slug') as HTMLInputElement).value = agent.slug;
+      ($('agent-name') as HTMLInputElement).value = agent.name;
+      ($('agent-area') as HTMLInputElement).value = agent.area ?? '';
+      ($('agent-encargado') as HTMLInputElement).value = agent.encargado ?? '';
+      ($('agent-summary') as HTMLInputElement).value = agent.summary;
+      ($('agent-description') as HTMLTextAreaElement).value = agent.description ?? '';
+      ($('agent-slug') as HTMLInputElement).value = agent.slug;
+      ($('agent-cover') as HTMLInputElement).value = agent.cover ?? '';
+      ($('agent-video-url') as HTMLInputElement).value = agent.video_url ?? '';
+      slugManuallyEdited = true;
+      updateCoverPreview();
+    } else {
+      panelTitle.textContent = 'Nuevo agente';
+      form.reset();
+      ($('agent-original-slug') as HTMLInputElement).value = '';
+      slugManuallyEdited = false;
+      hideCoverPreview();
+    }
+    clearFieldErrors();
+    populateAreaSuggestions();
+    panel.dataset.open = 'true';
+    panel.setAttribute('aria-hidden', 'false');
+    backdrop.dataset.open = 'true';
+    document.body.style.overflow = 'hidden';
+    window.setTimeout(() => ($('agent-name') as HTMLInputElement).focus(), 50);
+  }
+
+  function closePanel() {
+    panel.dataset.open = 'false';
+    panel.setAttribute('aria-hidden', 'true');
+    backdrop.dataset.open = 'false';
+    document.body.style.overflow = '';
+  }
+
+  function populateAreaSuggestions() {
+    const datalist = $('areas-suggestions') as HTMLDataListElement;
+    datalist.innerHTML = (window.__ADMIN_AREAS ?? [])
+      .map((a) => `<option value="${a.replace(/"/g, '&quot;')}"></option>`)
+      .join('');
+  }
+
+  function clearFieldErrors() {
+    document.querySelectorAll<HTMLElement>('.form-error').forEach((el) => {
+      el.classList.add('hidden');
+      el.textContent = '';
     });
   }
 
-  function showFieldError(id: string, msg: string) {
+  function setFieldError(id: string, msg: string) {
     const el = $(id);
     el.textContent = msg;
-    el.classList.add('show');
+    el.classList.remove('hidden');
   }
 
-  function openCreateModal() {
-    $('modal-title').textContent = 'Nuevo agente';
-    ($('agent-form') as HTMLFormElement).reset();
-    ($('agent-id') as HTMLInputElement).value = '';
-    $('agent-slug').removeAttribute('readonly');
-    $('modal-delete-btn').hidden = true;
-    clearErrors();
-    $('modal-overlay').hidden = false;
-    $('agent-slug').focus();
+  // ---- auto-slug ----
+  const nameInput = $<HTMLInputElement>('agent-name');
+  const slugInput = $<HTMLInputElement>('agent-slug');
+
+  nameInput.addEventListener('input', () => {
+    if (!slugManuallyEdited) {
+      slugInput.value = slugify(nameInput.value);
+    }
+  });
+  slugInput.addEventListener('input', () => {
+    slugManuallyEdited = slugInput.value.trim() !== '';
+  });
+  slugInput.addEventListener('blur', () => {
+    if (slugInput.value) slugInput.value = slugify(slugInput.value);
+  });
+
+  // ---- cover preview ----
+  const coverInput = $<HTMLInputElement>('agent-cover');
+  const coverPreview = $('cover-preview');
+  const coverPreviewImg = $<HTMLImageElement>('cover-preview-img');
+
+  function updateCoverPreview() {
+    const url = coverInput.value.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      hideCoverPreview();
+      return;
+    }
+    coverPreviewImg.src = url;
+    coverPreviewImg.onerror = hideCoverPreview;
+    coverPreviewImg.onload = () => coverPreview.classList.remove('hidden');
   }
-
-  function openEditModal(slug: string) {
-    const a = getAgentFromRow(slug);
-    if (!a) return;
-    $('modal-title').textContent = 'Editar agente';
-    ($('agent-id') as HTMLInputElement).value = a.slug;
-    const slugInput = $('agent-slug') as HTMLInputElement;
-    slugInput.value = a.slug;
-    slugInput.setAttribute('readonly', 'true');
-    ($('agent-name') as HTMLInputElement).value = a.name;
-    ($('agent-summary') as HTMLInputElement).value = a.summary;
-    ($('agent-area') as HTMLInputElement).value = a.area ?? '';
-    ($('agent-encargado') as HTMLInputElement).value = a.encargado ?? '';
-    ($('agent-video-url') as HTMLInputElement).value = a.video_url ?? '';
-    ($('agent-cover') as HTMLInputElement).value = a.cover ?? '';
-    ($('agent-description') as HTMLTextAreaElement).value = a.description ?? '';
-    $('modal-delete-btn').hidden = false;
-    clearErrors();
-    $('modal-overlay').hidden = false;
-    $('agent-name').focus();
+  function hideCoverPreview() {
+    coverPreview.classList.add('hidden');
   }
+  coverInput.addEventListener('input', updateCoverPreview);
+  coverInput.addEventListener('paste', () => window.setTimeout(updateCoverPreview, 50));
 
-  function closeModal() {
-    $('modal-overlay').hidden = true;
-  }
+  // ---- form submit ----
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearFieldErrors();
 
-  async function saveAgent() {
-    const saveBtn = $('modal-save-btn') as HTMLButtonElement;
-    const btnText = $('save-btn-text');
-    const spinner = $('save-btn-spinner');
-    saveBtn.disabled = true;
-    btnText.textContent = 'Guardando…';
-    spinner.style.display = 'inline-block';
+    const name = nameInput.value.trim();
+    const summary = ($('agent-summary') as HTMLInputElement).value.trim();
+    let slug = slugInput.value.trim() || slugify(name);
+    slugInput.value = slug;
 
-    const slug = ($('agent-slug') as HTMLInputElement).value.trim();
+    let hasError = false;
+    if (!name) { setFieldError('name-error', 'El nombre es obligatorio'); hasError = true; }
+    if (!summary) { setFieldError('summary-error', 'El resumen es obligatorio'); hasError = true; }
+    if (!slug) { setFieldError('slug-error', 'El slug es obligatorio'); hasError = true; }
+    if (hasError) return;
+
+    const originalSlug = ($('agent-original-slug') as HTMLInputElement).value;
+    const isEdit = Boolean(originalSlug);
 
     const body = {
       slug,
-      name: ($('agent-name') as HTMLInputElement).value.trim(),
-      summary: ($('agent-summary') as HTMLInputElement).value.trim(),
+      name,
+      summary,
       description: ($('agent-description') as HTMLTextAreaElement).value.trim(),
       area: ($('agent-area') as HTMLInputElement).value.trim() || null,
       encargado: ($('agent-encargado') as HTMLInputElement).value.trim() || null,
+      cover: coverInput.value.trim() || null,
       video_url: ($('agent-video-url') as HTMLInputElement).value.trim() || null,
-      cover: ($('agent-cover') as HTMLInputElement).value.trim() || null,
     };
 
-    const editingSlug = ($('agent-id') as HTMLInputElement).value;
-    const isEdit = Boolean(editingSlug);
-    const url = isEdit ? `/api/agents/${encodeURIComponent(editingSlug)}` : '/api/agents';
-    const method = isEdit ? 'PUT' : 'POST';
+    saveBtn.disabled = true;
+    saveText.textContent = 'Guardando…';
+    saveSpinner.classList.remove('hidden');
 
     try {
+      const url = isEdit ? `/api/agents/${encodeURIComponent(originalSlug)}` : '/api/agents';
+      const method = isEdit ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
-      if (res.ok) {
-        showToast(isEdit ? 'Agente actualizado' : 'Agente creado', 'success');
-        window.location.reload();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Error al guardar' }));
+        showToast(err.error ?? 'Error al guardar', 'error');
         return;
       }
 
-      const err = await res.json().catch(() => ({ error: 'Error al guardar' }));
-      showToast(err.error ?? 'Error al guardar', 'error');
+      showToast(isEdit ? 'Agente actualizado' : 'Agente creado', 'success');
+      closePanel();
+      await refreshAgents();
     } catch {
       showToast('Error de conexión', 'error');
     } finally {
       saveBtn.disabled = false;
-      btnText.textContent = 'Guardar';
-      spinner.style.display = 'none';
+      saveText.textContent = 'Guardar';
+      saveSpinner.classList.add('hidden');
+    }
+  });
+
+  // ---- refresh ----
+  async function refreshAgents() {
+    try {
+      const res = await fetch('/api/agents', { credentials: 'same-origin' });
+      if (!res.ok) {
+        if (res.status === 401) { window.location.href = '/admin/login'; return; }
+        return;
+      }
+      const agents: Agent[] = await res.json();
+      renderGrid(agents);
+      updateAreas(agents);
+    } catch {
+      showToast('Error refrescando lista', 'error');
     }
   }
 
-  function handleFormSubmit(e: Event) {
-    e.preventDefault();
-    clearErrors();
-    const slug = ($('agent-slug') as HTMLInputElement).value.trim();
-    const name = ($('agent-name') as HTMLInputElement).value.trim();
-    const summary = ($('agent-summary') as HTMLInputElement).value.trim();
-    let hasError = false;
-    if (!slug) { showFieldError('slug-error', 'El slug es obligatorio'); hasError = true; }
-    if (!name) { showFieldError('name-error', 'El nombre es obligatorio'); hasError = true; }
-    if (!summary) { showFieldError('summary-error', 'El resumen es obligatorio'); hasError = true; }
-    if (hasError) return;
-    saveAgent();
+  function escAttr(s: string) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function escHtml(s: string) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  async function handleDelete() {
-    if (!window.confirm('¿Estás seguro de eliminar este agente?')) return;
-    const slug = ($('agent-id') as HTMLInputElement).value;
+  function renderCard(a: Agent): string {
+    const c = colorForArea(a.area);
+    const rt = relativeTime(a.updated_at);
+    const cover = a.cover
+      ? `<img src="${escAttr(a.cover)}" alt="" loading="lazy" class="block h-full w-full object-cover" onerror="this.style.display='none'" />`
+      : '<div class="h-full w-full flex items-center justify-center"><svg viewBox="0 0 120 60" class="w-3/4 opacity-50"><g fill="currentColor" class="text-icesi-blue-soft"><rect x="0" y="20" width="14" height="20"/><rect x="20" y="10" width="14" height="40"/><rect x="40" y="25" width="14" height="10"/><rect x="60" y="15" width="14" height="30"/><rect x="80" y="22" width="14" height="16"/><rect x="100" y="8" width="14" height="44"/></g></svg></div>';
+    const videoBadge = a.video_url
+      ? '<span aria-label="Tiene video" class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-semibold text-icesi-blue-deep shadow-sm"><svg viewBox="0 0 12 12" width="9" height="9"><path d="M3 2 L10 6 L3 10 Z" fill="currentColor"/></svg>Video</span>'
+      : '';
+    const areaBadge = a.area
+      ? `<span class="self-start inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${c.bg} ${c.text}">${escHtml(a.area)}</span>`
+      : '';
+    const enc = a.encargado
+      ? `<p class="text-[11px] text-subtle font-medium mt-auto pt-2 truncate">${escHtml(a.encargado)}</p>`
+      : '';
+    const upd = rt ? `<p class="text-[10px] text-icesi-gray-1">${escHtml(rt)}</p>` : '';
+
+    return `<article class="admin-card group relative flex flex-col bg-[var(--color-surface)] border border-border overflow-hidden"
+      data-agent='${escAttr(JSON.stringify(a))}'
+      data-slug="${escAttr(a.slug)}"
+      data-name-search="${escAttr(a.name.toLowerCase())}"
+      data-summary-search="${escAttr(a.summary.toLowerCase())}"
+      data-encargado-search="${escAttr((a.encargado ?? '').toLowerCase())}"
+      data-area="${escAttr(a.area ?? '')}">
+      <div class="card-default flex flex-col h-full">
+        <div class="relative aspect-video w-full overflow-hidden bg-[var(--color-surface-2)]">${cover}${videoBadge}</div>
+        <div class="flex flex-1 flex-col gap-2 p-4">
+          ${areaBadge}
+          <h3 class="text-[15px] font-bold leading-snug tracking-tight text-text line-clamp-2">${escHtml(a.name)}</h3>
+          <p class="text-xs leading-relaxed text-muted line-clamp-2">${escHtml(a.summary)}</p>
+          ${enc}${upd}
+        </div>
+        <div class="flex border-t border-border">
+          <button type="button" class="js-edit flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-muted hover:bg-[var(--color-surface-2)] hover:text-icesi-blue-deep transition-colors" data-slug="${escAttr(a.slug)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar
+          </button>
+          <div class="w-px bg-border"></div>
+          <button type="button" class="js-delete-ask flex items-center justify-center px-4 py-2.5 text-xs font-semibold text-muted hover:bg-[#fef2f2] hover:text-[#dc2626] transition-colors" data-slug="${escAttr(a.slug)}" aria-label="Eliminar ${escAttr(a.name)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="card-confirm absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/95 backdrop-blur-sm p-6 text-center">
+        <p class="text-sm font-semibold text-text">¿Eliminar este agente?</p>
+        <p class="text-xs text-muted">"${escHtml(a.name)}"</p>
+        <div class="flex gap-2 mt-2">
+          <button type="button" class="js-delete-cancel rounded border border-border bg-white px-3 py-1.5 text-xs font-semibold text-muted hover:bg-[var(--color-surface-2)]" data-slug="${escAttr(a.slug)}">Cancelar</button>
+          <button type="button" class="js-delete-confirm rounded bg-[#dc2626] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#b91c1c]" data-slug="${escAttr(a.slug)}">Sí, eliminar</button>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function renderGrid(agents: Agent[]) {
+    grid.innerHTML = agents.map(renderCard).join('');
+    applyFilter();
+    updateCount(agents.length);
+  }
+
+  function updateCount(n: number) {
+    const counter = document.querySelector('h1 span');
+    if (counter) counter.textContent = `(${n})`;
+  }
+
+  function updateAreas(agents: Agent[]) {
+    const areas = Array.from(
+      new Set(agents.map((a) => a.area).filter((a): a is string => Boolean(a))),
+    ).sort((a, b) => a.localeCompare(b, 'es'));
+    window.__ADMIN_AREAS = areas;
+  }
+
+  // ---- delegations ----
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+
+    if (target.closest('#new-agent-btn')) {
+      openPanel();
+      return;
+    }
+    if (target.closest('#panel-close') || target.closest('#panel-cancel') || target === backdrop) {
+      closePanel();
+      return;
+    }
+
+    const editBtn = target.closest<HTMLElement>('.js-edit');
+    if (editBtn) {
+      const card = editBtn.closest<HTMLElement>('.admin-card');
+      if (!card?.dataset.agent) return;
+      try {
+        openPanel(JSON.parse(card.dataset.agent) as Agent);
+      } catch { /* ignore */ }
+      return;
+    }
+
+    const askBtn = target.closest<HTMLElement>('.js-delete-ask');
+    if (askBtn) {
+      const card = askBtn.closest<HTMLElement>('.admin-card');
+      if (card) card.dataset.state = 'confirm-delete';
+      return;
+    }
+
+    const cancelBtn = target.closest<HTMLElement>('.js-delete-cancel');
+    if (cancelBtn) {
+      const card = cancelBtn.closest<HTMLElement>('.admin-card');
+      if (card) delete card.dataset.state;
+      return;
+    }
+
+    const confirmBtn = target.closest<HTMLElement>('.js-delete-confirm');
+    if (confirmBtn?.dataset.slug) {
+      void handleDelete(confirmBtn.dataset.slug);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (panel.dataset.open === 'true') {
+      closePanel();
+      return;
+    }
+    const expanded = document.querySelector<HTMLElement>('.admin-card[data-state="confirm-delete"]');
+    if (expanded) delete expanded.dataset.state;
+  });
+
+  async function handleDelete(slug: string) {
     try {
       const res = await fetch(`/api/agents/${encodeURIComponent(slug)}`, {
         method: 'DELETE',
         credentials: 'same-origin',
       });
-      if (res.ok) {
-        showToast('Agente eliminado', 'success');
-        window.location.reload();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Error al eliminar' }));
+        showToast(err.error ?? 'Error al eliminar', 'error');
         return;
       }
-      const err = await res.json().catch(() => ({ error: 'Error al eliminar' }));
-      showToast(err.error ?? 'Error al eliminar', 'error');
+      showToast('Agente eliminado', 'success');
+      await refreshAgents();
     } catch {
       showToast('Error de conexión', 'error');
     }
   }
 
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
-    window.location.href = '/admin/login';
-  }
-
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const editBtn = target.closest<HTMLElement>('.btn-edit');
-    if (editBtn?.dataset.slug) {
-      openEditModal(editBtn.dataset.slug);
-      return;
-    }
-    if (target.closest('#new-agent-btn')) { openCreateModal(); return; }
-    if (target.closest('#logout-btn')) { handleLogout(); return; }
-    if (target.closest('#modal-close-btn') || target.closest('#cancel-btn')) {
-      closeModal();
-      return;
-    }
-    if (target.closest('#modal-delete-btn')) { handleDelete(); return; }
-    if (target === $('modal-overlay')) closeModal();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
-  });
-
-  ($('agent-form') as HTMLFormElement).addEventListener('submit', handleFormSubmit);
+  applyFilter();
 </script>
