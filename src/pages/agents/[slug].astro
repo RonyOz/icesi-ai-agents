@@ -6,13 +6,13 @@ import { withBase } from "../../lib/url";
 import { getAgentBySlug } from "../../lib/db";
 
 const { slug } = Astro.params;
-const agent = await getAgentBySlug(slug);
+const agent = await getAgentBySlug(slug!);
 
 if (!agent) {
   return Astro.redirect('/');
 }
 
-const team: string[] = (() => { try { return JSON.parse(agent.team); } catch { return []; } })();
+const team = agent.team;
 ---
 
 <BaseLayout

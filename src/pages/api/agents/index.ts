@@ -1,31 +1,39 @@
 import type { APIRoute } from 'astro';
 import { getAllAgents, createAgent } from '../../../lib/db';
+import { isAdmin, jsonError, jsonOk } from '../../../lib/auth';
 
-function isAuthenticated(Astro: { cookies: { get: (name: string) => { value: string | undefined } | undefined } }) {
-  return Astro.cookies.get('admin_session')?.value === 'icesi-admin-token';
-}
-
-export const GET: APIRoute = async (Astro) => {
-  if (!isAuthenticated(Astro)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+export const GET: APIRoute = async ({ cookies }) => {
+  if (!isAdmin(cookies)) return jsonError('Unauthorized', 401);
+  try {
+    const agents = await getAllAgents();
+    return jsonOk(agents);
+  } catch (e) {
+    console.error('[api/agents GET]', e);
+    return jsonError('Database error', 500);
   }
-  const agents = await getAllAgents();
-  return new Response(JSON.stringify(agents), { headers: { 'Content-Type': 'application/json' } });
 };
 
-export const POST: APIRoute = async (Astro) => {
-  if (!isAuthenticated(Astro)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
+export const POST: APIRoute = async ({ request, cookies }) => {
+  if (!isAdmin(cookies)) return jsonError('Unauthorized', 401);
   try {
-    const body = await Astro.request.json();
+    const body = await request.json();
     const { slug, name, summary, description, team, video_url, video_local, cover } = body;
     if (!slug || !name || !summary) {
-      return new Response(JSON.stringify({ error: 'slug, name, and summary are required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+      return jsonError('slug, name y summary son obligatorios', 400);
     }
-    await createAgent({ slug, name, summary, description: description ?? '', team: team ?? '[]', video_url: video_url ?? null, video_local: video_local ?? null, cover: cover ?? null });
-    return new Response(JSON.stringify({ ok: true }), { status: 201, headers: { 'Content-Type': 'application/json' } });
+    await createAgent({
+      slug,
+      name,
+      summary,
+      description,
+      team: Array.isArray(team) ? team : [],
+      video_url,
+      video_local,
+      cover,
+    });
+    return jsonOk({ ok: true }, 201);
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('[api/agents POST]', e);
+    return jsonError(String(e), 500);
   }
 };

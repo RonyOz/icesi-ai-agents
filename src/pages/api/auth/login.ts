@@ -1,27 +1,25 @@
 import type { APIRoute } from 'astro';
+import { SESSION_COOKIE, SESSION_TOKEN, SESSION_MAX_AGE, jsonError, jsonOk } from '../../../lib/auth';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  let password: unknown;
   try {
-    const { password } = await request.json();
-    if (password === import.meta.env.ADMIN_PASSWORD) {
-      cookies.set('admin_session', 'icesi-admin-token', {
-        path: '/',
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24 * 7,
-      });
-      return new Response(JSON.stringify({ ok: true }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    return new Response(JSON.stringify({ error: 'Invalid password' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    ({ password } = await request.json());
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid request' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError('Invalid request', 400);
   }
+
+  if (typeof password !== 'string' || password !== import.meta.env.ADMIN_PASSWORD) {
+    return jsonError('Invalid password', 401);
+  }
+
+  cookies.set(SESSION_COOKIE, SESSION_TOKEN, {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: import.meta.env.PROD,
+    maxAge: SESSION_MAX_AGE,
+  });
+
+  return jsonOk({ ok: true });
 };

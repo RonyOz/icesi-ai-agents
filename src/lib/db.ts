@@ -1,8 +1,9 @@
 import { createClient } from '@libsql/client';
+import { nanoid } from 'nanoid';
 
 let _client: ReturnType<typeof createClient> | null = null;
 
-export function getDb() {
+function getDb() {
   if (!_client) {
     _client = createClient({
       url: import.meta.env.TURSO_DATABASE_URL,
@@ -18,53 +19,103 @@ export interface Agent {
   name: string;
   summary: string;
   description: string;
-  team: string;
+  team: string[];
   video_url: string | null;
   video_local: string | null;
   cover: string | null;
   updated_at: string | null;
 }
 
+export interface AgentInput {
+  slug: string;
+  name: string;
+  summary: string;
+  description?: string;
+  team?: string[];
+  video_url?: string | null;
+  video_local?: string | null;
+  cover?: string | null;
+}
+
+const SELECT_COLS =
+  'id, slug, name, summary, description, team, video_url, video_local, cover, updated_at';
+
+function parseTeam(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map(String);
+  if (typeof raw !== 'string' || raw.trim() === '') return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function rowToAgent(row: Record<string, unknown>): Agent {
+  return {
+    id: String(row.id ?? ''),
+    slug: String(row.slug ?? ''),
+    name: String(row.name ?? ''),
+    summary: String(row.summary ?? ''),
+    description: String(row.description ?? ''),
+    team: parseTeam(row.team),
+    video_url: (row.video_url as string | null) ?? null,
+    video_local: (row.video_local as string | null) ?? null,
+    cover: (row.cover as string | null) ?? null,
+    updated_at: (row.updated_at as string | null) ?? null,
+  };
+}
+
 export async function getAllAgents(): Promise<Agent[]> {
   const db = getDb();
-  const result = await db.execute(
-    'SELECT id, slug, name, summary, description, team, video_url, video_local, cover, updated_at FROM agents ORDER BY name'
-  );
-  return result.rows as Agent[];
+  const result = await db.execute(`SELECT ${SELECT_COLS} FROM agents ORDER BY name`);
+  return result.rows.map((r) => rowToAgent(r as Record<string, unknown>));
 }
 
 export async function getAgentBySlug(slug: string): Promise<Agent | null> {
   const db = getDb();
   const result = await db.execute({
-    sql: 'SELECT id, slug, name, summary, description, team, video_url, video_local, cover, updated_at FROM agents WHERE slug = ?',
+    sql: `SELECT ${SELECT_COLS} FROM agents WHERE slug = ?`,
     args: [slug],
   });
-  return (result.rows[0] as Agent) ?? null;
+  const row = result.rows[0];
+  return row ? rowToAgent(row as Record<string, unknown>) : null;
 }
 
-export async function createAgent(agent: Omit<Agent, 'id' | 'updated_at'>): Promise<void> {
+export async function createAgent(input: AgentInput): Promise<void> {
   const db = getDb();
-  const { nanoid } = await import('nanoid');
-  const id = nanoid();
   await db.execute({
     sql: `INSERT INTO agents (id, slug, name, summary, description, team, video_url, video_local, cover)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: [id, agent.slug, agent.name, agent.summary, agent.description, agent.team, agent.video_url, agent.video_local, agent.cover],
+    args: [
+      nanoid(),
+      input.slug,
+      input.name,
+      input.summary,
+      input.description ?? '',
+      JSON.stringify(input.team ?? []),
+      input.video_url ?? null,
+      input.video_local ?? null,
+      input.cover ?? null,
+    ],
   });
 }
 
-export async function updateAgent(slug: string, agent: Partial<Omit<Agent, 'id' | 'updated_at' | 'slug'>>): Promise<void> {
+export async function updateAgent(
+  slug: string,
+  patch: Partial<Omit<AgentInput, 'slug'>>,
+): Promise<void> {
   const db = getDb();
   const fields: string[] = [];
   const args: (string | null)[] = [];
 
-  if (agent.name !== undefined) { fields.push('name = ?'); args.push(agent.name); }
-  if (agent.summary !== undefined) { fields.push('summary = ?'); args.push(agent.summary); }
-  if (agent.description !== undefined) { fields.push('description = ?'); args.push(agent.description); }
-  if (agent.team !== undefined) { fields.push('team = ?'); args.push(agent.team); }
-  if (agent.video_url !== undefined) { fields.push('video_url = ?'); args.push(agent.video_url); }
-  if (agent.video_local !== undefined) { fields.push('video_local = ?'); args.push(agent.video_local); }
-  if (agent.cover !== undefined) { fields.push('cover = ?'); args.push(agent.cover); }
+  if (patch.name !== undefined) { fields.push('name = ?'); args.push(patch.name); }
+  if (patch.summary !== undefined) { fields.push('summary = ?'); args.push(patch.summary); }
+  if (patch.description !== undefined) { fields.push('description = ?'); args.push(patch.description); }
+  if (patch.team !== undefined) { fields.push('team = ?'); args.push(JSON.stringify(patch.team)); }
+  if (patch.video_url !== undefined) { fields.push('video_url = ?'); args.push(patch.video_url); }
+  if (patch.video_local !== undefined) { fields.push('video_local = ?'); args.push(patch.video_local); }
+  if (patch.cover !== undefined) { fields.push('cover = ?'); args.push(patch.cover); }
 
   if (fields.length === 0) return;
   args.push(slug);

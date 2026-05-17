@@ -1,0 +1,125 @@
+---
+---
+
+<div
+  id="modal-overlay"
+  class="modal-overlay"
+  hidden
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+>
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Nuevo agente</h2>
+      <button class="btn-close" id="modal-close-btn" type="button" aria-label="Cerrar">
+        &times;
+      </button>
+    </div>
+    <form id="agent-form" novalidate>
+      <div class="modal-body">
+        <input type="hidden" id="agent-id" name="agent-id" />
+        <div class="form-group">
+          <label for="agent-slug">Slug <span aria-hidden="true">*</span></label>
+          <span class="form-hint">URL: /agents/[slug]/</span>
+          <input
+            type="text"
+            id="agent-slug"
+            name="slug"
+            required
+            placeholder="mi-nuevo-agente"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <p class="form-error" id="slug-error" role="alert"></p>
+        </div>
+        <div class="form-group">
+          <label for="agent-name">Nombre <span aria-hidden="true">*</span></label>
+          <input
+            type="text"
+            id="agent-name"
+            name="name"
+            required
+            placeholder="Agente consultor de…"
+            autocomplete="off"
+          />
+          <p class="form-error" id="name-error" role="alert"></p>
+        </div>
+        <div class="form-group">
+          <label for="agent-summary">Resumen <span aria-hidden="true">*</span></label>
+          <input
+            type="text"
+            id="agent-summary"
+            name="summary"
+            required
+            placeholder="Breve descripción del agente"
+            autocomplete="off"
+          />
+          <p class="form-error" id="summary-error" role="alert"></p>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="agent-video-url">Video URL</label>
+            <input
+              type="url"
+              id="agent-video-url"
+              name="video_url"
+              placeholder="https://youtube.com/…"
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-group">
+            <label for="agent-video-local">Video Local</label>
+            <input
+              type="text"
+              id="agent-video-local"
+              name="video_local"
+              placeholder="/videos/nombre.mp4"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="agent-cover">Cover (ruta imagen)</label>
+          <input
+            type="text"
+            id="agent-cover"
+            name="cover"
+            placeholder="/images/cover.jpg"
+            autocomplete="off"
+          />
+        </div>
+        <div class="form-group">
+          <label for="agent-team">Equipo</label>
+          <input
+            type="text"
+            id="agent-team"
+            name="team"
+            placeholder="Juan Pérez, María García"
+            autocomplete="off"
+          />
+          <p class="form-hint">Separar nombres con comas.</p>
+        </div>
+        <div class="form-group">
+          <label for="agent-description">Descripción</label>
+          <textarea
+            id="agent-description"
+            name="description"
+            placeholder="Descripción detallada del agente…"
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancel-btn">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="modal-save-btn">
+          <span id="save-btn-text">Guardar</span>
+          <span id="save-btn-spinner" class="loading-spinner" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="btn btn-danger" id="modal-delete-btn" hidden>
+          Eliminar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
