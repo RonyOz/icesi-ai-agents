@@ -371,8 +371,8 @@ const title = 'Dashboard · Admin';
         setTimeout(function() { el.setAttribute('aria-hidden', 'true'); }, 3000);
       }
 
-      function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"'); }
-      function escAttr(s) { if (!s) return ''; return String(s).replace(/&/g,'&').replace(/"/g,'&#34;').replace(/'/g,'''); }
+      function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"').replace(/\r?\n/g,' ').replace(/\t/g,' '); }
+      function escAttr(s) { if (!s) return ''; return String(s).replace(/&/g,'&').replace(/"/g,'"').replace(/'/g,''').replace(/</g,'<').replace(/>/g,'>'); }
 
       document.getElementById('logout-btn').addEventListener('click', async function() {
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
