@@ -1,13 +1,15 @@
 const PALETTE = [
-  { bg: 'bg-icesi-blue-soft', text: 'text-icesi-blue-deep' },
-  { bg: 'bg-[#f3ecff]', text: 'text-[#5a2bb8]' },
-  { bg: 'bg-[#ecf9f0]', text: 'text-[#1f7a45]' },
-  { bg: 'bg-[#fff7d6]', text: 'text-[#7a6a00]' },
-  { bg: 'bg-[#ffece2]', text: 'text-[#a13a14]' },
-  { bg: 'bg-[#f0f0f3]', text: 'text-[#4b5160]' },
+  { bg: '#eeeefd', text: '#2d2d9c' },
+  { bg: '#f3ecff', text: '#5a2bb8' },
+  { bg: '#ecf9f0', text: '#1f7a45' },
+  { bg: '#fff7d6', text: '#7a6a00' },
+  { bg: '#ffece2', text: '#a13a14' },
+  { bg: '#f0f0f3', text: '#4b5160' },
 ];
 
-export function colorForArea(area: string | null): { bg: string; text: string } {
+export interface AreaColors { bg: string; text: string }
+
+export function colorForArea(area: string | null): AreaColors {
   if (!area) return PALETTE[5];
   let hash = 0;
   for (let i = 0; i < area.length; i++) hash = (hash * 31 + area.charCodeAt(i)) | 0;

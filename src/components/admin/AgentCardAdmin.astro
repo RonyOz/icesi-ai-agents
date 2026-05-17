@@ -46,7 +46,10 @@ const updated = relativeTime(agent.updated_at);
 
     <div class="flex flex-1 flex-col gap-2 p-4">
       {agent.area && (
-        <span class={`self-start inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${areaColors.bg} ${areaColors.text}`}>
+        <span
+          class="self-start inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+          style={`background:${areaColors.bg};color:${areaColors.text};`}
+        >
           {agent.area}
         </span>
       )}

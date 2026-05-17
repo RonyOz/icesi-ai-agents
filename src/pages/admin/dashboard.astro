@@ -388,23 +388,30 @@ const areas = Array.from(
   }
 
   function escAttr(s: string) {
-    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
   function escHtml(s: string) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
+
+  const CENEFA_FALLBACK = `<div class="relative h-full w-full overflow-hidden" style="background-color:var(--color-icesi-blue);" aria-hidden="true"><svg viewBox="0 0 100 8" preserveAspectRatio="xMidYMid meet" class="absolute inset-x-0 top-1/2 -translate-y-1/2 w-[70%] left-1/2 -translate-x-1/2" style="color:rgba(255,255,255,0.55);"><rect x="0" y="0" width="2" height="8" fill="currentColor"/><rect x="8" y="0" width="4" height="8" fill="currentColor"/><rect x="18" y="0" width="7" height="8" fill="currentColor"/><rect x="31" y="0" width="11" height="8" fill="currentColor"/><rect x="48" y="0" width="16" height="8" fill="currentColor"/><rect x="70" y="0" width="24" height="8" fill="currentColor"/></svg></div>`;
 
   function renderCard(a: Agent): string {
     const c = colorForArea(a.area);
     const rt = relativeTime(a.updated_at);
     const cover = a.cover
       ? `<img src="${escAttr(a.cover)}" alt="" loading="lazy" class="block h-full w-full object-cover" onerror="this.style.display='none'" />`
-      : '<div class="h-full w-full flex items-center justify-center"><svg viewBox="0 0 120 60" class="w-3/4 opacity-50"><g fill="currentColor" class="text-icesi-blue-soft"><rect x="0" y="20" width="14" height="20"/><rect x="20" y="10" width="14" height="40"/><rect x="40" y="25" width="14" height="10"/><rect x="60" y="15" width="14" height="30"/><rect x="80" y="22" width="14" height="16"/><rect x="100" y="8" width="14" height="44"/></g></svg></div>';
+      : CENEFA_FALLBACK;
     const videoBadge = a.video_url
       ? '<span aria-label="Tiene video" class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-semibold text-icesi-blue-deep shadow-sm"><svg viewBox="0 0 12 12" width="9" height="9"><path d="M3 2 L10 6 L3 10 Z" fill="currentColor"/></svg>Video</span>'
       : '';
     const areaBadge = a.area
-      ? `<span class="self-start inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${c.bg} ${c.text}">${escHtml(a.area)}</span>`
+      ? `<span class="self-start inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold" style="background:${c.bg};color:${c.text};">${escHtml(a.area)}</span>`
       : '';
     const enc = a.encargado
       ? `<p class="text-[11px] text-subtle font-medium mt-auto pt-2 truncate">${escHtml(a.encargado)}</p>`
@@ -412,7 +419,7 @@ const areas = Array.from(
     const upd = rt ? `<p class="text-[10px] text-icesi-gray-1">${escHtml(rt)}</p>` : '';
 
     return `<article class="admin-card group relative flex flex-col bg-[var(--color-surface)] border border-border overflow-hidden"
-      data-agent='${escAttr(JSON.stringify(a))}'
+      data-agent="${escAttr(JSON.stringify(a))}"
       data-slug="${escAttr(a.slug)}"
       data-name-search="${escAttr(a.name.toLowerCase())}"
       data-summary-search="${escAttr(a.summary.toLowerCase())}"
@@ -439,7 +446,7 @@ const areas = Array.from(
       </div>
       <div class="card-confirm absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/95 backdrop-blur-sm p-6 text-center">
         <p class="text-sm font-semibold text-text">¿Eliminar este agente?</p>
-        <p class="text-xs text-muted">"${escHtml(a.name)}"</p>
+        <p class="text-xs text-muted">&ldquo;${escHtml(a.name)}&rdquo;</p>
         <div class="flex gap-2 mt-2">
           <button type="button" class="js-delete-cancel rounded border border-border bg-white px-3 py-1.5 text-xs font-semibold text-muted hover:bg-[var(--color-surface-2)]" data-slug="${escAttr(a.slug)}">Cancelar</button>
           <button type="button" class="js-delete-confirm rounded bg-[#dc2626] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#b91c1c]" data-slug="${escAttr(a.slug)}">Sí, eliminar</button>
