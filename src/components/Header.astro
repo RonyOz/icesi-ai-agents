@@ -29,5 +29,11 @@ const { count } = Astro.props as { count?: number };
         {count} {count === 1 ? 'agente' : 'agentes'} en desarrollo
       </span>
     )}
+    <a
+      href={withBase('/admin/dashboard')}
+      class="text-xs font-medium text-muted hover:text-icesi-blue transition-colors"
+    >
+      Admin
+    </a>
   </div>
 </header>
