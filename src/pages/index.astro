@@ -1,17 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AgentCard from '../components/AgentCard.astro';
 import Cenefa from '../components/Cenefa.astro';
+import { getAllAgents } from '../lib/db';
 
-const allAgents = await getCollection('agents');
-
-const agents = allAgents
-  .map((entry) => ({
-    slug: entry.id.replace(/\.(md|mdx)$/, ''),
-    ...entry.data,
-  }))
-  .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+const agents = await getAllAgents();
 ---
 
 <BaseLayout count={agents.length}>
@@ -41,8 +34,8 @@ const agents = allAgents
           slug={agent.slug}
           name={agent.name}
           summary={agent.summary}
-          videoUrl={agent.videoUrl}
-          videoLocal={agent.videoLocal}
+          videoUrl={agent.video_url}
+          videoLocal={agent.video_local}
           cover={agent.cover}
         />
       </li>

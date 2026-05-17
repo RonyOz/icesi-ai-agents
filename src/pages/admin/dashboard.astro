@@ -1,0 +1,295 @@
+---
+title: 'Dashboard · Admin'
+description = 'Panel de administración de agentes'
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --font-sans: "Plus Jakarta Sans", sans-serif;
+        --color-icesi-blue: #5454e9;
+        --color-icesi-blue-deep: #2d2d9c;
+        --color-text: #14161c;
+        --color-muted: #4b5160;
+        --color-bg: #f6f6f9;
+        --color-surface: #ffffff;
+        --color-border: #e4e4ea;
+        --color-icesi-red: #dc2626;
+        --color-icesi-green: #16a34a;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-sans);
+        background: var(--color-bg);
+        color: var(--color-text);
+        min-height: 100vh;
+      }
+      .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+      .header h1 { font-size: 1.75rem; font-weight: 800; }
+      .btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.375rem; }
+      .btn-primary { background: var(--color-icesi-blue); color: white; }
+      .btn-primary:hover { background: var(--color-icesi-blue-deep); }
+      .btn-ghost { background: transparent; color: var(--color-muted); border: 1px solid var(--color-border); }
+      .btn-ghost:hover { background: #f3f4f6; }
+      .btn-danger { background: #fef2f2; color: var(--color-icesi-red); border: 1px solid #fecaca; }
+      .btn-danger:hover { background: #fee2e2; }
+      .card { background: var(--color-surface); border-radius: 12px; border: 1px solid var(--color-border); overflow: hidden; }
+      table { width: 100%; border-collapse: collapse; }
+      thead { background: #f9fafb; }
+      th { text-align: left; padding: 0.875rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--color-muted); letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--color-border); }
+      td { padding: 1rem; border-bottom: 1px solid var(--color-border); font-size: 0.9rem; vertical-align: middle; }
+      tr:last-child td { border-bottom: none; }
+      tr:hover td { background: #fafafa; }
+      .name-cell { font-weight: 600; }
+      .actions { display: flex; gap: 0.5rem; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+      .modal { background: var(--color-surface); border-radius: 16px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; }
+      .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; border-bottom: 1px solid var(--color-border); }
+      .modal-header h2 { font-size: 1.2rem; font-weight: 700; }
+      .modal-body { padding: 1.5rem; }
+      .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; gap: 0.75rem; }
+      .form-group { margin-bottom: 1.25rem; }
+      .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--color-text); margin-bottom: 0.375rem; }
+      .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.625rem 0.875rem; border: 1.5px solid var(--color-border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; background: white; }
+      .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--color-icesi-blue); }
+      .form-group textarea { resize: vertical; min-height: 100px; }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .form-hint { font-size: 0.75rem; color: var(--color-muted); margin-top: 0.25rem; }
+      .empty-state { text-align: center; padding: 4rem 2rem; color: var(--color-muted); }
+      .loading { display: flex; align-items: center; justify-content: center; padding: 4rem; color: var(--color-muted); }
+      .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.875rem 1.25rem; border-radius: 10px; font-size: 0.875rem; font-weight: 500; z-index: 2000; animation: slideUp 0.2s ease; }
+      .toast-success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+      .toast-error { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+      @keyframes slideUp { from { transform: translateY(1rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Agentes de IA</h1>
+        <div style="display:flex;gap:0.75rem;align-items:center;">
+          <button class="btn btn-ghost" onclick="window.location.href='/'">Ver sitio</button>
+          <button class="btn btn-ghost" id="logout-btn">Cerrar sesión</button>
+          <button class="btn btn-primary" onclick="openCreateModal()">+ Nuevo agente</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="loading" class="loading">Cargando agentes…</div>
+        <div id="empty" class="empty-state" style="display:none;">
+          <p style="font-size:1.1rem;margin-bottom:0.5rem;">No hay agentes cargados.</p>
+          <p style="font-size:0.875rem;">Hacé clic en "Nuevo agente" para crear el primero.</p>
+        </div>
+        <div id="table-container" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Resumen</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="agents-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-title">Nuevo agente</h2>
+          <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;font-size:1.5rem;line-height:1;color:var(--color-muted);">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="agent-id" />
+          <div class="form-group">
+            <label for="agent-slug">Slug * <span class="form-hint">URL: /agents/[slug]/</span></label>
+            <input type="text" id="agent-slug" required placeholder="mi-nuevo-agente" />
+          </div>
+          <div class="form-group">
+            <label for="agent-name">Nombre *</label>
+            <input type="text" id="agent-name" required placeholder="AgenteConsultor de..." />
+          </div>
+          <div class="form-group">
+            <label for="agent-summary">Resumen *</label>
+            <input type="text" id="agent-summary" required placeholder="Breve descripción del agente" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="agent-video-url">Video URL</label>
+              <input type="url" id="agent-video-url" placeholder="https://youtube.com/..." />
+            </div>
+            <div class="form-group">
+              <label for="agent-video-local">Video Local</label>
+              <input type="text" id="agent-video-local" placeholder="/videos/nombre.mp4" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="agent-cover">Cover (ruta imagen)</label>
+            <input type="text" id="agent-cover" placeholder="/images/cover.jpg" />
+          </div>
+          <div class="form-group">
+            <label for="agent-team">Equipo (separar con comas)</label>
+            <input type="text" id="agent-team" placeholder="Juan Pérez, María García" />
+          </div>
+          <div class="form-group">
+            <label for="agent-description">Descripción</label>
+            <textarea id="agent-description" placeholder="Descripción detallada del agente..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" id="modal-save-btn" onclick="saveAgent()">Guardar</button>
+          <button class="btn btn-danger" id="modal-delete-btn" style="display:none;" onclick="deleteAgent()">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" style="display:none;"></div>
+
+    <script>
+      let agents = [];
+
+      async function loadAgents() {
+        const res = await fetch('/api/agents');
+        if (!res.ok) { window.location.href = '/admin/login'; return; }
+        agents = await res.json();
+        renderTable();
+      }
+
+      function renderTable() {
+        (document.getElementById('loading') as HTMLElement).style.display = 'none';
+        if (agents.length === 0) {
+          (document.getElementById('empty') as HTMLElement).style.display = 'block';
+          return;
+        }
+        (document.getElementById('table-container') as HTMLElement).style.display = 'block';
+        const tbody = document.getElementById('agents-tbody');
+        tbody.innerHTML = agents.map(a => `
+          <tr>
+            <td class="name-cell">${escHtml(a.name)}</td>
+            <td style="color:var(--color-muted);font-size:0.85rem;">${escHtml(a.summary)}</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-ghost" onclick="openEditModal('${escAttr(a.slug)}')">Editar</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      function openCreateModal() {
+        document.getElementById('modal-title').textContent = 'Nuevo agente';
+        (document.getElementById('agent-id') as HTMLInputElement).value = '';
+        (document.getElementById('agent-slug') as HTMLInputElement).value = '';
+        (document.getElementById('agent-slug') as HTMLInputElement).removeAttribute('readonly');
+        (document.getElementById('agent-name') as HTMLInputElement).value = '';
+        (document.getElementById('agent-summary') as HTMLInputElement).value = '';
+        (document.getElementById('agent-video-url') as HTMLInputElement).value = '';
+        (document.getElementById('agent-video-local') as HTMLInputElement).value = '';
+        (document.getElementById('agent-cover') as HTMLInputElement).value = '';
+        (document.getElementById('agent-team') as HTMLInputElement).value = '';
+        (document.getElementById('agent-description') as HTMLTextAreaElement).value = '';
+        (document.getElementById('modal-delete-btn') as HTMLButtonElement).style.display = 'none';
+        (document.getElementById('modal-overlay') as HTMLElement).style.display = 'flex';
+      }
+
+      function openEditModal(slug: string) {
+        const a = agents.find(x => x.slug === slug);
+        if (!a) return;
+        document.getElementById('modal-title').textContent = 'Editar agente';
+        (document.getElementById('agent-id') as HTMLInputElement).value = a.slug;
+        (document.getElementById('agent-slug') as HTMLInputElement).value = a.slug;
+        (document.getElementById('agent-slug') as HTMLInputElement).setAttribute('readonly', 'true');
+        (document.getElementById('agent-name') as HTMLInputElement).value = a.name;
+        (document.getElementById('agent-summary') as HTMLInputElement).value = a.summary;
+        (document.getElementById('agent-video-url') as HTMLInputElement).value = a.video_url || '';
+        (document.getElementById('agent-video-local') as HTMLInputElement).value = a.video_local || '';
+        (document.getElementById('agent-cover') as HTMLInputElement).value = a.cover || '';
+        try { (document.getElementById('agent-team') as HTMLInputElement).value = JSON.parse(a.team).join(', '); } catch { (document.getElementById('agent-team') as HTMLInputElement).value = ''; }
+        (document.getElementById('agent-description') as HTMLTextAreaElement).value = a.description || '';
+        (document.getElementById('modal-delete-btn') as HTMLButtonElement).style.display = 'inline-flex';
+        (document.getElementById('modal-overlay') as HTMLElement).style.display = 'flex';
+      }
+
+      function closeModal() {
+        (document.getElementById('modal-overlay') as HTMLElement).style.display = 'none';
+      }
+
+      async function saveAgent() {
+        const slug = (document.getElementById('agent-slug') as HTMLInputElement).value.trim();
+        const name = (document.getElementById('agent-name') as HTMLInputElement).value.trim();
+        const summary = (document.getElementById('agent-summary') as HTMLInputElement).value.trim();
+        if (!slug || !name || !summary) { showToast('slug, nombre y resumen son obligatorios', 'error'); return; }
+        const teamStr = (document.getElementById('agent-team') as HTMLInputElement).value.trim();
+        const team = JSON.stringify(teamStr ? teamStr.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+        const body = {
+          slug,
+          name,
+          summary,
+          description: (document.getElementById('agent-description') as HTMLTextAreaElement).value.trim(),
+          team,
+          video_url: (document.getElementById('agent-video-url') as HTMLInputElement).value.trim() || null,
+          video_local: (document.getElementById('agent-video-local') as HTMLInputElement).value.trim() || null,
+          cover: (document.getElementById('agent-cover') as HTMLInputElement).value.trim() || null,
+        };
+        const idField = (document.getElementById('agent-id') as HTMLInputElement).value;
+        const isEdit = Boolean(idField);
+        const res = await fetch(isEdit ? `/api/agents/${idField}` : '/api/agents', {
+          method: isEdit ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (res.ok) {
+          closeModal();
+          showToast(isEdit ? 'Agente actualizado' : 'Agente creado', 'success');
+          loadAgents();
+        } else {
+          const err = await res.json();
+          showToast(err.error || 'Error al guardar', 'error');
+        }
+      }
+
+      async function deleteAgent() {
+        if (!confirm('¿Estás seguro de eliminar este agente?')) return;
+        const slug = (document.getElementById('agent-id') as HTMLInputElement).value;
+        const res = await fetch(`/api/agents/${slug}`, { method: 'DELETE' });
+        if (res.ok) {
+          closeModal();
+          showToast('Agente eliminado', 'success');
+          loadAgents();
+        } else {
+          const err = await res.json();
+          showToast(err.error || 'Error al eliminar', 'error');
+        }
+      }
+
+      function showToast(msg: string, type: string) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = `toast toast-${type}`;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 3000);
+      }
+
+      function escHtml(s: string) { if (!s) return ''; return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"'); }
+      function escAttr(s) { if (!s) return ''; return String(s).replace(/&/g,'&').replace(/"/g,'&34;').replace(/'/g,'&39;'); }
+
+      (document.getElementById('logout-btn') as HTMLButtonElement).addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/admin/login';
+      });
+
+      loadAgents();
+    </script>
+  </body>
+</html>
