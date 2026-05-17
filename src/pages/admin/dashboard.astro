@@ -207,7 +207,7 @@ const title = 'Dashboard · Admin';
 
       async function loadAgents() {
         document.getElementById('loading').style.display = 'flex';
-        var res = await fetch('/api/agents');
+        var res = await fetch('/api/agents', { credentials: 'same-origin' });
         if (!res.ok) { window.location.href = '/admin/login'; return; }
         agents = await res.json();
         renderTable();
@@ -375,7 +375,7 @@ const title = 'Dashboard · Admin';
       function escAttr(s) { if (!s) return ''; return String(s).replace(/&/g,'&').replace(/"/g,'&#34;').replace(/'/g,'''); }
 
       document.getElementById('logout-btn').addEventListener('click', async function() {
-        await fetch('/api/auth/logout', { method: 'POST' });
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
         window.location.href = '/admin/login';
       });
 
