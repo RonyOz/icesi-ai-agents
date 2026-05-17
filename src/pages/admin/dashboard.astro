@@ -215,7 +215,14 @@ const areas = Array.from(
   });
 
   // ---- panel ----
+  function resetSaveButton() {
+    saveBtn.disabled = false;
+    saveText.textContent = 'Guardar';
+    saveSpinner.classList.add('hidden');
+  }
+
   function openPanel(agent?: Agent) {
+    resetSaveButton();
     if (agent) {
       panelTitle.textContent = 'Editar agente';
       ($('agent-original-slug') as HTMLInputElement).value = agent.slug;
@@ -321,7 +328,6 @@ const areas = Array.from(
 
     let hasError = false;
     if (!name) { setFieldError('name-error', 'El nombre es obligatorio'); hasError = true; }
-    if (!summary) { setFieldError('summary-error', 'El resumen es obligatorio'); hasError = true; }
     if (!slug) { setFieldError('slug-error', 'El slug es obligatorio'); hasError = true; }
     if (hasError) return;
 
@@ -360,14 +366,13 @@ const areas = Array.from(
       }
 
       showToast(isEdit ? 'Agente actualizado' : 'Agente creado', 'success');
+      resetSaveButton();
       closePanel();
-      await refreshAgents();
+      void refreshAgents();
     } catch {
       showToast('Error de conexión', 'error');
     } finally {
-      saveBtn.disabled = false;
-      saveText.textContent = 'Guardar';
-      saveSpinner.classList.add('hidden');
+      resetSaveButton();
     }
   });
 

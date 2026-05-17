@@ -18,13 +18,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
     const { slug, name, summary, description, area, encargado, video_url, cover } = body;
-    if (!slug || !name || !summary) {
-      return jsonError('slug, name y summary son obligatorios', 400);
+    if (!slug || !name) {
+      return jsonError('slug y name son obligatorios', 400);
     }
     await createAgent({
       slug,
       name,
-      summary,
+      summary: summary ?? '',
       description,
       area,
       encargado,

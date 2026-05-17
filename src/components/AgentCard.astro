@@ -1,23 +1,32 @@
 ---
 import Cenefa from './Cenefa.astro';
 import { withBase } from '../lib/url';
+import { colorForArea } from '../lib/format';
 
 type Props = {
   slug: string;
   name: string;
   summary: string;
+  area?: string | null;
+  encargado?: string | null;
   videoUrl?: string;
   cover?: string;
 };
 
-const { slug, name, summary, videoUrl, cover } = Astro.props;
+const { slug, name, summary, area, encargado, videoUrl, cover } = Astro.props;
 const hasMedia = Boolean(videoUrl || cover);
+const areaColors = area ? colorForArea(area) : null;
 ---
 
 <a
   href={withBase(`/agents/${slug}/`)}
   data-name={name}
-  class="group flex h-full flex-col border border-border bg-(--color-surface) transition-colors hover:border-icesi-blue"
+  data-name-search={name.toLowerCase()}
+  data-summary-search={(summary ?? '').toLowerCase()}
+  data-encargado-search={(encargado ?? '').toLowerCase()}
+  data-area-search={(area ?? '').toLowerCase()}
+  data-area={area ?? ''}
+  class="js-public-card group flex h-full flex-col border border-border bg-(--color-surface) transition-colors hover:border-icesi-blue"
 >
   <div class="relative w-full overflow-hidden">
     {cover ? (
@@ -44,11 +53,30 @@ const hasMedia = Boolean(videoUrl || cover);
   </div>
 
   <div class="flex flex-1 flex-col gap-3 p-6">
+    {area && areaColors && (
+      <span
+        class="self-start inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+        style={`background:${areaColors.bg};color:${areaColors.text};`}
+      >
+        {area}
+      </span>
+    )}
     <h3 class="text-[1.2rem] font-bold leading-snug tracking-tight text-text group-hover:text-icesi-blue-deep">
       {name}
     </h3>
-    <p class="text-sm leading-relaxed text-muted line-clamp-3">{summary}</p>
-    <span class="mt-auto pt-3 text-xs font-semibold text-icesi-blue group-hover:underline">
+    {summary && (
+      <p class="text-sm leading-relaxed text-muted line-clamp-3">{summary}</p>
+    )}
+    {encargado && (
+      <p class="text-xs text-subtle font-medium mt-auto pt-2 flex items-center gap-1.5">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        {encargado}
+      </p>
+    )}
+    <span class={`${encargado ? '' : 'mt-auto'} pt-3 text-xs font-semibold text-icesi-blue group-hover:underline`}>
       Ver detalle →
     </span>
   </div>
